@@ -143,22 +143,13 @@
                         this.y = y;
                     }
 
-                    var last_x = [0,0,0,0], last_y = [0,0,0,0];
-                    for(i = 0; i < 4; i++){
-                        last_x[i] = getRandomFloat(0,255);
-                        last_y[i] = getRandomFloat(0,255);
-                        history.push(new instanceMaking(i, last_x[i], last_y[i]));
-                    }
-
+                    history.push(new instanceMaking(0, getRandomFloat(0,255), getRandomFloat(0,255)))
+                    history.push(new instanceMaking(1, getRandomFloat(0,255), getRandomFloat(0,255)))
+                    history.push(new instanceMaking(2, getRandomFloat(0,255), getRandomFloat(0,255)))
+                    history.push(new instanceMaking(3, getRandomFloat(0,255), getRandomFloat(0,255)))
                     for(i = 0; i < (size-4)/2; i++){
-                        newId1 = getRandomInt(0,3);
-                        last_x[newId1] = last_x[newId1] + getRandomInt(-10,10);
-                        last_y[newId1] = last_y[newId1] + getRandomInt(-10,10);
-                        history.push(new instanceMaking(newId1, last_x[newId1], last_y[newId1]));
-                        newId2 = getRandomInt(0,3);
-                        last_x[newId2] = last_x[newId2] + getRandomInt(-10,10);
-                        last_y[newId2] = last_y[newId2] + getRandomInt(-10,10);
-                        history.push(new instanceMaking(newId2, last_x[newId2], last_y[newId2]));
+                        history.push(new instanceMaking(getRandomInt(0,3), getRandomFloat(0,255), getRandomFloat(0,255)));
+                        history.push(new instanceMaking(getRandomInt(0,3), getRandomFloat(0,255), getRandomFloat(0,255)));
                     }
                     return history;
                 }
