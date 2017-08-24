@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <title>JavaScript Canvas Sample Page</title>
 
-        <!-- javascript 本体 -->
+        <!-- javascript 本体(実際にはjsファイルに書いたほうがよい) -->
         <script>
             function draw(){
                 var canvas = document.getElementById('canvas1');
@@ -14,44 +14,43 @@
                 }
                 var context = canvas.getContext('2d');
 
-                function getRandomFloat(min, max) {
-                  return Math.random()*(max - min) + min;
-                }
-                function getRandomInt(min, max) {
-                  return Math.floor(Math.random()*(max - min + 1)) + min;
-                }
-                function instanceMaking(id, x, y){
-                    this.id = id;
-                    this.x = x;
-                    this.y = y;
-                }
+                var userHistory = getHistory(20);
+                var machineHistory = getHistory(20);
 
-                var dotHistory = [];
-                for(var i = 0; i < 20; i++){
-                    dotHistory.push(new instanceMaking(getRandomInt(0,3), getRandomFloat(100,300), getRandomFloat(100,300)));
-                }
-
-                for(var i = 0; i < 20; i++){
-                    plotDot(dotHistory[i]['x'], dotHistory[i]['y'], dotHistory[i]['id'], 'rgb(0, 255, 255)');
-                }
-
-                plotDot(10, 10, 0, 'rgb(255, 0, 0)');
-                plotDot(20, 10, 1, 'rgb(255, 255, 0)');
-                plotDot(30, 10, 2, 'rgb(0, 255, 0)');
-                plotDot(40, 10, 3, 'rgb(0, 255, 255)');
-                plotDot(50, 10, 4, 'rgb(0, 0, 255)');
+                plotInOrder(0, 10);
+                drawAxis();
 
                 /*点を打つ関数*/
                 function plotDot(x, y, marker, color){
                     var size = 10;
 
+                    /*数値であるか判定*/
+                    if(x == null || y == null || isNaN(x) || isNaN(y)) return;
+
+                    /*キャンバスの端を10%余白として0から255の値をキャンバスに書くための変換*/
+                    x = x*((canvas.width*0.8)/255) + (canvas.width*0.1);
+                    y = y*((canvas.height*0.8)/255) + (canvas.height*0.1);
+                    y = canvas.height - y; //上下反転変換
+
+                    /*色を指定*/
+                    if(color == 0) color = 'rgb(0, 255, 255)';
+                    else if(color == 1) color = 'rgb(255, 0, 255)';
+                    else if(color == 2) color = 'rgb(255, 255, 0)';
+                    else if(color == 3) color = 'rgb(0, 255, 0)';
+                    else if(color == 4) color = 'rgb(0, 0, 255)';
+                    else if(color == 5) color = 'rgb(255, 0, 0)';
+                    else{
+                        console.log('error : color is not ploper in this program plotDot')
+                    }
+
+                    /*マーカーを指定して描画*/
                     if(marker == 0) drawCrossDot();
                     else if(marker == 1) drawStrokeCircleDot();
                     else if(marker == 2) drawFillCircleDot();
                     else if(marker == 3) drawStrokeSquareDot();
                     else if(marker == 4) drawFillSquareDot();
                     else{
-                        console.log("error : marker is not proper in this program");
+                        console.log("error : marker is not proper in this program plotDot");
                         return;
                     }
 
@@ -87,6 +86,81 @@
                         context.fillStyle = color;
                         context.fillRect(x-size/2, y-size/2, size, size);
                     }
+                }
+
+                /*軸を表示する関数*/
+                function drawAxis(){
+                    context.beginPath();
+                    context.strokeStyle = 'rgb(0, 0, 0)';
+                    context.moveTo(canvas.width*0.1, canvas.height*0.9);
+                    context.lineTo(canvas.width*0.1, canvas.height*0.1);
+                    context.stroke();
+                    context.moveTo(canvas.width*0.1, canvas.height*0.9);
+                    context.lineTo(canvas.width*0.9, canvas.height*0.9);
+                    context.stroke();
+                }
+
+                /*numに指定した回数分の履歴をplotする関数*/
+                function plotHistory(dotHistory, num, marker){
+                    var i, n;
+                    if(num > (dotHistory.length - 4)/2) num = (dotHistory.length - 4)/2; //表示回数がデータの表示できる回数分より大きかった場合はそこで打ち切る
+
+                    /*データの表示*/
+                    plotDot(dotHistory[0]['x'], dotHistory[0]['y'], marker, dotHistory[0]['id']);
+                    plotDot(dotHistory[1]['x'], dotHistory[1]['y'], marker, dotHistory[1]['id']);
+                    plotDot(dotHistory[2]['x'], dotHistory[2]['y'], marker, dotHistory[2]['id']);
+                    plotDot(dotHistory[3]['x'], dotHistory[3]['y'], marker, dotHistory[3]['id']);
+                    for(n = 0; n < num; n++){
+                        i = 4 + n*2;
+                        plotDot(dotHistory[i]['x'], dotHistory[i]['y'], marker, dotHistory[i]['id']);
+                        plotDot(dotHistory[i+1]['x'], dotHistory[i+1]['y'], marker, dotHistory[i+1]['id']);
+                    }
+                }
+
+                /*履歴を順番に表示していく関数*/
+                function plotInOrder(i, endCount){
+                    if(i <= endCount){
+                        plotHistory(userHistory, i, 0);
+                        plotHistory(machineHistory, i, 1);
+                        setTimeout(function(){plotInOrder(++i, endCount)}, 1000);
+                    }
+                }
+
+                /*plotデータをランダムで作成する関数*/
+                function getHistory(size){
+                    var i;
+                    var history = [];
+
+                    function getRandomFloat(min, max) {
+                      return Math.random()*(max - min) + min;
+                    }
+                    function getRandomInt(min, max) {
+                      return Math.floor(Math.random()*(max - min + 1)) + min;
+                    }
+                    function instanceMaking(id, x, y){
+                        this.id = id;
+                        this.x = x;
+                        this.y = y;
+                    }
+
+                    var last_x = [0,0,0,0], last_y = [0,0,0,0];
+                    for(i = 0; i < 4; i++){
+                        last_x[i] = getRandomFloat(0,255);
+                        last_y[i] = getRandomFloat(0,255);
+                        history.push(new instanceMaking(i, last_x[i], last_y[i]));
+                    }
+
+                    for(i = 0; i < (size-4)/2; i++){
+                        newId1 = getRandomInt(0,3);
+                        last_x[newId1] = last_x[newId1] + getRandomInt(-10,10);
+                        last_y[newId1] = last_y[newId1] + getRandomInt(-10,10);
+                        history.push(new instanceMaking(newId1, last_x[newId1], last_y[newId1]));
+                        newId2 = getRandomInt(0,3);
+                        last_x[newId2] = last_x[newId2] + getRandomInt(-10,10);
+                        last_y[newId2] = last_y[newId2] + getRandomInt(-10,10);
+                        history.push(new instanceMaking(newId2, last_x[newId2], last_y[newId2]));
+                    }
+                    return history;
                 }
             }
 
