@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <title>JavaScript Canvas Sample Page</title>
+
+        <!-- javascript 本体 -->
+        <script>
+            function draw(){
+                var canvas = document.getElementById('canvas1');
+                if(!canvas || !canvas.getContext){
+                    console.log('error : can not load canvas');
+                    return false;
+                }
+                var context = canvas.getContext('2d');
+
+                function getRandomFloat(min, max) {
+                  return Math.random()*(max - min) + min;
+                }
+                function getRandomInt(min, max) {
+                  return Math.floor(Math.random()*(max - min + 1)) + min;
+                }
+                function instanceMaking(id, x, y){
+                    this.id = id;
+                    this.x = x;
+                    this.y = y;
+                }
+
+                var dotHistory = [];
+                for(var i = 0; i < 20; i++){
+                    dotHistory.push(new instanceMaking(getRandomInt(0,3), getRandomFloat(100,300), getRandomFloat(100,300)));
+                }
+
+                for(var i = 0; i < 20; i++){
+                    plotDot(dotHistory[i]['x'], dotHistory[i]['y'], dotHistory[i]['id'], 'rgb(0, 255, 255)');
+                }
+
+                plotDot(10, 10, 0, 'rgb(255, 0, 0)');
+                plotDot(20, 10, 1, 'rgb(255, 255, 0)');
+                plotDot(30, 10, 2, 'rgb(0, 255, 0)');
+                plotDot(40, 10, 3, 'rgb(0, 255, 255)');
+                plotDot(50, 10, 4, 'rgb(0, 0, 255)');
+
+                /*点を打つ関数*/
+                function plotDot(x, y, marker, color){
+                    var size = 10;
+
+                    if(marker == 0) drawCrossDot();
+                    else if(marker == 1) drawStrokeCircleDot();
+                    else if(marker == 2) drawFillCircleDot();
+                    else if(marker == 3) drawStrokeSquareDot();
+                    else if(marker == 4) drawFillSquareDot();
+                    else{
+                        console.log("error : marker is not proper in this program");
+                        return;
+                    }
+
+                    function drawCrossDot(){
+                        context.beginPath();
+                        context.strokeStyle = color;
+                        context.moveTo(x-size/2, y-size/2);
+                        context.lineTo(x+size/2, y+size/2);
+                        context.stroke();
+                        context.moveTo(x-size/2, y+size/2);
+                        context.lineTo(x+size/2, y-size/2);
+                        context.stroke();
+                    }
+                    function drawStrokeCircleDot(){
+                        context.beginPath();
+                        context.strokeStyle = color;
+                        context.arc(x, y, size/2, 0, Math.PI*2, false);
+                        context.stroke();
+                    }
+                    function drawFillCircleDot(){
+                        context.beginPath();
+                        context.fillStyle = color;
+                        context.arc(x, y, size/2, 0, Math.PI*2, false);
+                        context.fill();
+                    }
+                    function drawStrokeSquareDot(){
+                        context.beginPath();
+                        context.strokeStyle = color;
+                        context.strokeRect(x-size/2, y-size/2, size, size);
+                    }
+                    function drawFillSquareDot(){
+                        context.beginPath();
+                        context.fillStyle = color;
+                        context.fillRect(x-size/2, y-size/2, size, size);
+                    }
+                }
+            }
+
+
+        </script>
+
+    </head>
+
+    <!-- bodyを表示完了後にonLoadに登録された関数が実行される -->
+    <body onLoad="draw();">
+        <canvas id="canvas1" width="400" height="400" style="border:solid 1px #000"></canvas>
+    </body>
+</html>
