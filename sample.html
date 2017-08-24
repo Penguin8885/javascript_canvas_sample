@@ -98,6 +98,11 @@
                     context.moveTo(canvas.width*0.1, canvas.height*0.9);
                     context.lineTo(canvas.width*0.9, canvas.height*0.9);
                     context.stroke();
+
+                    context.fillText('0', canvas.width*0.1-10, canvas.height*0.9);
+                    context.fillText('255', canvas.width*0.1-20, canvas.height*0.11);
+                    context.fillText('0', canvas.width*0.1, canvas.height*0.9+10);
+                    context.fillText('255', canvas.width*0.9-10, canvas.height*0.9+10);
                 }
 
                 /*numに指定した回数分の履歴をplotする関数*/
@@ -120,6 +125,7 @@
                 /*履歴を順番に表示していく関数*/
                 function plotInOrder(i, endCount){
                     if(i <= endCount){
+                        console.log('counter:' + i)
                         plotHistory(userHistory, i, 0);
                         plotHistory(machineHistory, i, 1);
                         setTimeout(function(){plotInOrder(++i, endCount)}, 1000);
