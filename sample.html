@@ -7,6 +7,7 @@
         <!-- javascript 本体(実際にはjsファイルに書いたほうがよい) -->
         <script>
             function draw(){
+                /*====メインここから====*/
                 var canvas = document.getElementById('canvas1');
                 if(!canvas || !canvas.getContext){
                     console.log('error : can not load canvas');
@@ -14,23 +15,34 @@
                 }
                 var context = canvas.getContext('2d');
 
-                var userHistory = getHistory(20);
-                var machineHistory = getHistory(20);
+                loop(0, 10000);
+                /*====メインここまで====*/
 
-                plotInOrder(0, 10);
-                drawAxis();
+                /*各秒置きにloopContentを実行する関数*/
+                function loop(i, endCount){
+                    if(i <= endCount){
+                        loopContent(i);
+                        setTimeout(function(){loop(++i, endCount)}, 2);
+                    }
+                }
+                /*各秒置きに行いたい内容をここに書く*/
+                function loopContent(i){
+                    //console.log('counter:' + i)
+                    //context.clearRect(0, 0, canvas.width, canvas.height);   //画面クリア
+
+                    plotDot(getRandomInt(canvas.width*0.1, canvas.width*0.9), getRandomInt(canvas.height*0.1, canvas.height*0.9), getRandomInt(0,4), getRandomInt(0,5));
+                    function getRandomInt(min, max) {
+                        return Math.floor(Math.random()*(max - min + 1)) + min;
+                    }
+                }
 
                 /*点を打つ関数*/
                 function plotDot(x, y, marker, color){
                     var size = 10;
+                    var min = 0, max = 255; //グラフの最小値, 最大値
 
                     /*数値であるか判定*/
                     if(x == null || y == null || isNaN(x) || isNaN(y)) return;
-
-                    /*キャンバスの端を10%余白として0から255の値をキャンバスに書くための変換*/
-                    x = x*((canvas.width*0.8)/255) + (canvas.width*0.1);
-                    y = y*((canvas.height*0.8)/255) + (canvas.height*0.1);
-                    y = canvas.height - y; //上下反転変換
 
                     /*色を指定*/
                     if(color == 0) color = 'rgb(0, 255, 255)';
@@ -87,78 +99,6 @@
                         context.fillRect(x-size/2, y-size/2, size, size);
                     }
                 }
-
-                /*軸を表示する関数*/
-                function drawAxis(){
-                    context.beginPath();
-                    context.strokeStyle = 'rgb(0, 0, 0)';
-                    context.moveTo(canvas.width*0.1, canvas.height*0.9);
-                    context.lineTo(canvas.width*0.1, canvas.height*0.1);
-                    context.stroke();
-                    context.moveTo(canvas.width*0.1, canvas.height*0.9);
-                    context.lineTo(canvas.width*0.9, canvas.height*0.9);
-                    context.stroke();
-
-                    context.fillText('0', canvas.width*0.1-10, canvas.height*0.9);
-                    context.fillText('255', canvas.width*0.1-20, canvas.height*0.11);
-                    context.fillText('0', canvas.width*0.1, canvas.height*0.9+10);
-                    context.fillText('255', canvas.width*0.9-10, canvas.height*0.9+10);
-                }
-
-                /*numに指定した回数分の履歴をplotする関数*/
-                function plotHistory(dotHistory, num, marker){
-                    var i, n;
-                    if(num > (dotHistory.length - 4)/2) num = (dotHistory.length - 4)/2; //表示回数がデータの表示できる回数分より大きかった場合はそこで打ち切る
-
-                    /*データの表示*/
-                    plotDot(dotHistory[0]['x'], dotHistory[0]['y'], marker, dotHistory[0]['id']);
-                    plotDot(dotHistory[1]['x'], dotHistory[1]['y'], marker, dotHistory[1]['id']);
-                    plotDot(dotHistory[2]['x'], dotHistory[2]['y'], marker, dotHistory[2]['id']);
-                    plotDot(dotHistory[3]['x'], dotHistory[3]['y'], marker, dotHistory[3]['id']);
-                    for(n = 0; n < num; n++){
-                        i = 4 + n*2;
-                        plotDot(dotHistory[i]['x'], dotHistory[i]['y'], marker, dotHistory[i]['id']);
-                        plotDot(dotHistory[i+1]['x'], dotHistory[i+1]['y'], marker, dotHistory[i+1]['id']);
-                    }
-                }
-
-                /*履歴を順番に表示していく関数*/
-                function plotInOrder(i, endCount){
-                    if(i <= endCount){
-                        console.log('counter:' + i)
-                        plotHistory(userHistory, i, 0);
-                        plotHistory(machineHistory, i, 1);
-                        setTimeout(function(){plotInOrder(++i, endCount)}, 1000);
-                    }
-                }
-
-                /*plotデータをランダムで作成する関数*/
-                function getHistory(size){
-                    var i;
-                    var history = [];
-
-                    function getRandomFloat(min, max) {
-                      return Math.random()*(max - min) + min;
-                    }
-                    function getRandomInt(min, max) {
-                      return Math.floor(Math.random()*(max - min + 1)) + min;
-                    }
-                    function instanceMaking(id, x, y){
-                        this.id = id;
-                        this.x = x;
-                        this.y = y;
-                    }
-
-                    history.push(new instanceMaking(0, getRandomFloat(0,255), getRandomFloat(0,255)))
-                    history.push(new instanceMaking(1, getRandomFloat(0,255), getRandomFloat(0,255)))
-                    history.push(new instanceMaking(2, getRandomFloat(0,255), getRandomFloat(0,255)))
-                    history.push(new instanceMaking(3, getRandomFloat(0,255), getRandomFloat(0,255)))
-                    for(i = 0; i < (size-4)/2; i++){
-                        history.push(new instanceMaking(getRandomInt(0,3), getRandomFloat(0,255), getRandomFloat(0,255)));
-                        history.push(new instanceMaking(getRandomInt(0,3), getRandomFloat(0,255), getRandomFloat(0,255)));
-                    }
-                    return history;
-                }
             }
 
 
@@ -168,6 +108,6 @@
 
     <!-- bodyを表示完了後にonLoadに登録された関数が実行される -->
     <body onLoad="draw();">
-        <canvas id="canvas1" width="400" height="400" style="border:solid 1px #000"></canvas>
+        <canvas id="canvas1" width="500" height="500" style="border:solid 1px #000"></canvas>
     </body>
 </html>
